@@ -83,4 +83,4 @@ Since it loaded without a `ModuleNotFoundError`, the **SWIG Python bindings are 
 ## Deliverables
 
 **Screenshot:**  
-`build_preprocessor1.png`, `build_preprocessor2.png`, `build_compiler1.png` and `build_compiler2.png` – contains the Meson configuration output, preprocessing stage, and final compilation logs.
+![Preprocessor](build_preprocessor1.png), ![Preprocessor](build_preprocessor2.png), ![Compiler](build_compiler1.png) and ![Compiler](build_compiler2.png)  – contains the Meson configuration output, preprocessing stage, and final compilation logs.
