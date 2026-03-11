@@ -19,3 +19,12 @@ Referring to the linked paper (*Mi et al., "Investigation of the Mixing Process 
 1. **Potential Core:** My simulation captures the potential core region where velocity remains constant for roughly 4-6 nozzle diameters downstream, which is consistent with the PIV data in the paper.
 2. **Spreading Rate:** Qualitative analysis in ParaView shows a linear increase in jet width. This matches the LIF (Laser Induced Fluorescence) observations of fluid entrainment and jet spreading.
 3. **Velocity Decay:** The centerline velocity shows an inverse decay ($1/x$) once past the potential core, aligning with the mean flow statistics reported in the experimental study.
+
+##Deliverables
+**Convergence History:**
+The plot below shows the residual drop for the density and momentum equations.
+![Convergence History](residuals.png)
+
+**Velocity Magnitude Contour:**
+The following contour shows the jet development, including the potential core and the radial spreading.
+![Velocity Contour](results_contour.png)
