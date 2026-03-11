@@ -20,7 +20,7 @@ Referring to the linked paper (*Mi et al., "Investigation of the Mixing Process 
 2. **Spreading Rate:** Qualitative analysis in ParaView shows a linear increase in jet width. This matches the LIF (Laser Induced Fluorescence) observations of fluid entrainment and jet spreading.
 3. **Velocity Decay:** The centerline velocity shows an inverse decay ($1/x$) once past the potential core, aligning with the mean flow statistics reported in the experimental study.
 
-##Deliverables
+## Deliverables
 **Convergence History:**
 The plot below shows the residual drop for the density and momentum equations.
 ![Convergence History](residuals.png)
