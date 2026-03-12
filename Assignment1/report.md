@@ -30,7 +30,7 @@ I pointed the prefix to a local install folder to keep my WSL environment clean.
 
 ```bash
 # Setting up the build directory
-python3 meson.py build -Dprefix=$HOME/SU2/install -Dpython_wrapper=true -Denable-mpi=true
+python3 meson.py build -Dprefix=$HOME/SU2/install -Denable-pywrapper=true -Dwith-mpi=enabled
 ```
 
 ---
