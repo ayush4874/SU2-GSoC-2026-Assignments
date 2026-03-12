@@ -28,3 +28,16 @@ The plot below shows the residual drop for the density and momentum equations.
 **Velocity Magnitude Contour:**
 The following contour shows the jet development, including the potential core and the radial spreading.
 ![Velocity Contour](results_contour.png)
+
+## Mentor Review Updates
+
+**Mesh and y+:**
+Added a mesh visualization (`mesh.png`). The current mesh is a coarse unstructured grid and doesn't have any prism layers at the solid boundaries. Because of this, the y+ value is way too high for the Spalart-Allmaras turbulence model to accurately resolve the flow near the walls.
+
+![Mesh Detail](mesh.png)
+
+**Convergence & Residuals:**
+The `1e-8` value mentioned in the above was just the target set in the config (`CONV_RESIDUAL_MINVAL`). Checking the actual `history.csv`, the density residual (`rms[Rho]`) actually flatlines around -0.025. The simulation stalled and didn't properly converge, likely due to the mesh quality and the corner singularity.
+
+**Corner Velocity:**
+The >1000 m/s velocity at the nozzle lip is completely unphysical. It is a numerical singularity caused by the sharp 90-degree corner. The solver is trying to accelerate the flow around a point with zero radius, causing an artificial supersonic spike in that specific cell.
