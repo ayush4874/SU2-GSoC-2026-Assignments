@@ -22,7 +22,7 @@ export SU2_RUN=$HOME/SU2/install/bin
 export PYTHONPATH=$PYTHONPATH:$SU2_RUN
 
 mpirun -x PYTHONPATH -n 1 python3 launch_unsteady_CHT_FlatPlate.py -f unsteady_CHT_FlatPlate_Conf.cfg --parallel
-
+```
 ## 3. Results
 The Python wrapper successfully initialized both the fluid and solid zones and completed the required 10 unsteady time iterations, successfully transferring heat flux data between the domains at each step. 
 
