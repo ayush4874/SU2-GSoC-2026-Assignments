@@ -1,43 +1,47 @@
 # Assignment 2: Axisymmetric Turbulent Jet Simulation
 
-## Motivation
-The goal of this test case is to simulate a steady-state turbulent jet using RANS equations. I designed the domain to be large enough to allow the jet to develop fully without boundary interference. The axisymmetric formulation was chosen to reduce computational cost while maintaining 3D flow physics.
+## 1. Initial Setup
+The goal of this testcase was to simulate a steady-state turbulent jet to observe the mixing process and shear layer development. To keep computational costs down while still capturing 3D flow physics, I set up a 2D axisymmetric domain in Gmsh. 
 
-## Setup and Configuration
-- **Geometry:** Created in Gmsh. It features a jet inlet (R=0.05m), a symmetry axis, and a far-field boundary.
-- **Physics Model:** I used the Spalart-Allmaras (SA) turbulence model. It is well-suited for aerodynamic flows and jet shear layers.
-- **Numerical Schemes:** JST (Jameson-Schmidt-Turkel) for convective flows to ensure stability at the shear layer interface.
-- **Boundary Conditions:** - `MARKER_INLET`: Set to Mach 0.05.
-    - `MARKER_SYM`: Defined as the axis of symmetry.
-    - `MARKER_OUTLET`: Set to atmospheric pressure.
+Initially, my approach was to run this using SU2's standard compressible RANS solver with a target Mach number of 0.05. I used the Spalart-Allmaras (SA) turbulence model and the JST convective scheme. For the boundaries, I set the inlet to 105,000 Pa and the outlet to the standard atmospheric 101,325 Pa.
 
-## Convergence History
-The simulation was run for 500 iterations. As seen in the `history.csv`, the density and momentum residuals dropped significantly (below 10^-8), indicating a well-converged steady-state solution.
+## 2. Troubleshooting & Mentor Feedback
+My initial results were completely unphysical. The convergence flatlined early, and ParaView showed a massive velocity spike of over 890 m/s at the nozzle lip. I initially thought this was just a numerical singularity caused by the sharp 90-degree corner of the coarse mesh. 
 
-## Comparison with Experimental Values
-Referring to the linked paper (*Mi et al., "Investigation of the Mixing Process in an Axisymmetric Turbulent Jet"*):
-1. **Potential Core:** My simulation captures the potential core region where velocity remains constant for roughly 4-6 nozzle diameters downstream, which is consistent with the PIV data in the paper.
-2. **Spreading Rate:** Qualitative analysis in ParaView shows a linear increase in jet width. This matches the LIF (Laser Induced Fluorescence) observations of fluid entrainment and jet spreading.
-3. **Velocity Decay:** The centerline velocity shows an inverse decay ($1/x$) once past the potential core, aligning with the mean flow statistics reported in the experimental study.
+However, after discussing the setup with my mentor (Evert Bunschoten), I realized there were two fundamental physics errors in my configuration:
 
-## Deliverables
+1. **Compressibility at Low Speeds:** A target of Mach 0.05 is strictly incompressible. Forcing a compressible solver to evaluate this makes the equations incredibly stiff and unstable. 
+2. **Absolute vs. Gauge Pressure:** I switched the solver to `INC_RANS`, but my velocity was still massive. The compressible solver uses *absolute* pressure, the incompressible solver treats boundary values as *gauge* pressure relative to the freestream. By leaving my inlet at 105,000 Pa, I was commanding a massive artificial pressure drop over a tiny domain—essentially turning my simulation into a pressure cannon.
+
+## 3. The Corrected Configuration
+Taking the feedback into account, I overhauled the `.cfg` file:
+* **Solver:** Switched to `INC_RANS`.
+* **Convective Scheme:** Dropped JST (which caused the incompressible solver to blow up) and allowed SU2 to default to FDS, which handles incompressible flows much better.
+* **Boundary Conditions:** Updated the `PRESSURE_INLET` to a realistic `1.0` Pa and the `PRESSURE_OUTLET` to `0.0` Pa. 
+
+```text
+INC_INLET_TYPE= PRESSURE_INLET
+MARKER_INLET= ( MARKER_INLET, 288.15, 1.0, 1.0, 0.0, 0.0 )
+INC_OUTLET_TYPE= PRESSURE_OUTLET
+MARKER_OUTLET= ( MARKER_OUTLET, 0.0 )
+```
+## 4. Final Results and Experimental Comparison
+
 **Convergence History:**
-The plot below shows the residual drop for the density and momentum equations.
+With the physics properly constrained, the math stabilized perfectly. I ran the simulation on a single core (bypassing a known WSL OpenMPI shared-memory bug) for 2000 iterations. The simulation converged smoothly, with the pressure residual (`rms[P]`) dropping to approximately -5.48.
+
 ![Convergence History](residuals.png)
 
-**Velocity Magnitude Contour:**
-The following contour shows the jet development, including the potential core and the radial spreading.
-![Velocity Contour](results_contour.png)
+**Velocity Contour:**
+With the 1.0 Pa gauge pressure drop, the maximum velocity now sits at a highly realistic ~1.6 m/s. 
 
-## Mentor Review Updates
+![Corrected Velocity Contour](final_contour.png)
 
-**Mesh and y+:**
-Added a mesh visualization (`mesh.png`). The current mesh is a coarse unstructured grid and doesn't have any prism layers at the solid boundaries. Because of this, the y+ value is way too high for the Spalart-Allmaras turbulence model to accurately resolve the flow near the walls.
+Looking at the contour, the flow behaves exactly as expected when compared to the PIV and LIF data in the reference paper (*Mi et al., "Investigation of the Mixing Process in an Axisymmetric Turbulent Jet"*):
+
+* **Potential Core:** The simulation clearly captures the potential core region extending a few nozzle diameters downstream, where the centerline velocity remains undisturbed.
+* **Shear Layer & Spreading:** Past the potential core, you can see the turbulent shear layer expanding radially as the jet entrains the surrounding stationary fluid, causing the linear spreading rate characteristic of this type of flow.
+
+*(Note on Mesh/y+)*: I am currently using a relatively coarse unstructured grid without inflation layers at the solid boundaries (see `mesh.png` below). Because of this, the y+ value is higher than ideal for the SA model, but the macroscopic flow features of the jet still resolved quite well.
 
 ![Mesh Detail](mesh.png)
-
-**Convergence & Residuals:**
-The `1e-8` value mentioned above was just the target set in the config (`CONV_RESIDUAL_MINVAL`). Checking the actual `history.csv`, the density residual (`rms[Rho]`) actually flatlines around -0.025. The simulation stalled and didn't properly converge, likely due to the mesh quality and the corner singularity.
-
-**Corner Velocity:**
-The >1000 m/s velocity at the nozzle lip is completely unphysical. It is a numerical singularity caused by the sharp 90-degree corner. The solver is trying to accelerate the flow around a point with zero radius, causing an artificial supersonic spike in that specific cell.
