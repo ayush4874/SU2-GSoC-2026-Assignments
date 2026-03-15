@@ -26,4 +26,4 @@ Instead of fighting with ParaView's interpolation quirks, I decided to extract t
 
 I plotted those exact wall temperatures, and as you can see in the graph below, the python wrapper successfully forced the temperature step right where we split the boundary ($x \approx 0.32$ m)!
 
-![Spatially Varying Wall Temperature](wall_temperature_profile.jpg)
+![Spatially Varying Wall Temperature](wall_temperature_profile.png)
