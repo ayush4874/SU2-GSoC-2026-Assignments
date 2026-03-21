@@ -36,7 +36,7 @@ Following the feedback from the previous submission, the correct approach is to 
 
 When I tried this, I ran into a known WSL environment bug where the resulting `.vtu`/`.vtm` XML files caused ParaView to crash. To achieve the exact same boundary isolation without the XML crashes, I updated my configuration to use `SURFACE_CSV`. This forced SU2 to export the isolated boundary nodes into a simple spreadsheet.
 
-Since SU2 exports conservative variables to the CSV, I wrote a short Python script to read the Density ($\rho$) and Energy ($\rho E$) precisely at the wall. Because velocity is zero at the wall (no-slip condition), I was able to calculate the exact temperature mathematically using the ideal gas relation ($T = E / (\rho c_v)$) and plot it directly.
+Since SU2 exports conservative variables to the CSV, I wrote a short Python script to read the Density and Energy precisely at the wall. Because velocity is zero at the wall (no-slip condition), I was able to calculate the exact temperature mathematically using the ideal gas relation (T = Energy / (Density * cv)) and plot it directly.
 
 ![Spatially Varying Wall Temperature Verification](wall_multiblock_verification.png)
 
